@@ -1,0 +1,79 @@
+{
+  "broadcasters": {
+    "UCL": {
+      "primary": "Paramount+",
+      "link": "https://www.paramountplus.com/",
+      "paid": true
+    },
+    "UEL": {
+      "primary": "Paramount+",
+      "link": "https://www.paramountplus.com/",
+      "paid": true
+    },
+    "UECL": {
+      "primary": "Paramount+",
+      "link": "https://www.paramountplus.com/",
+      "paid": true
+    },
+    "Premier League": {
+      "primary": "NBC/Peacock",
+      "link": "https://www.peacocktv.com/sports/premier-league",
+      "paid": true
+    },
+    "La Liga": {
+      "primary": "ESPN+",
+      "link": "https://www.espn.com/espnplus/",
+      "paid": true
+    },
+    "Serie A": {
+      "primary": "Paramount+",
+      "link": "https://www.paramountplus.com/",
+      "paid": true
+    },
+    "Bundesliga": {
+      "primary": "ESPN+",
+      "link": "https://www.espn.com/espnplus/",
+      "paid": true
+    },
+    "Ligue 1": {
+      "primary": "beIN SPORTS",
+      "link": "https://www.beinsports.com/us/",
+      "paid": true
+    },
+    "Eredivisie": {
+      "primary": "ESPN+",
+      "link": "https://www.espn.com/espnplus/",
+      "paid": true
+    },
+    "FA Cup": {
+      "primary": "ESPN+",
+      "link": "https://www.espn.com/espnplus/",
+      "paid": true
+    },
+    "Copa del Rey": {
+      "primary": "ESPN+",
+      "link": "https://www.espn.com/espnplus/",
+      "paid": true
+    },
+    "Coppa Italia": {
+      "primary": "Paramount+",
+      "link": "https://www.paramountplus.com/",
+      "paid": true
+    },
+    "DFB-Pokal": {
+      "primary": "ESPN+",
+      "link": "https://www.espn.com/espnplus/",
+      "paid": true
+    },
+    "Coupe de France": {
+      "primary": "beIN SPORTS",
+      "link": "https://www.beinsports.com/us/",
+      "paid": true
+    },
+    "KNVB Cup": {
+      "primary": "ESPN+",
+      "link": "https://www.espn.com/espnplus/",
+      "paid": true
+    }
+  }
+}

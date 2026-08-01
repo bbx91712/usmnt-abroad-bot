@@ -1,0 +1,44 @@
+{
+  "rankings": {
+    "England": {
+      "rank": 1,
+      "coefficient": 104.303
+    },
+    "Spain": {
+      "rank": 2,
+      "coefficient": 89.712
+    },
+    "Italy": {
+      "rank": 3,
+      "coefficient": 81.855
+    },
+    "Germany": {
+      "rank": 4,
+      "coefficient": 79.481
+    },
+    "France": {
+      "rank": 5,
+      "coefficient": 61.165
+    },
+    "Netherlands": {
+      "rank": 6,
+      "coefficient": 59.9
+    },
+    "Portugal": {
+      "rank": 7,
+      "coefficient": 54.716
+    },
+    "Belgium": {
+      "rank": 8,
+      "coefficient": 46.6
+    },
+    "Scotland": {
+      "rank": 9,
+      "coefficient": 36.4
+    },
+    "Austria": {
+      "rank": 10,
+      "coefficient": 34.0
+    }
+  }
+}

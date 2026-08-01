@@ -1,0 +1,114 @@
+{
+  "players": [
+    {
+      "name": "Christian Pulisic",
+      "short_name": "Pulisic",
+      "player_id": 474,
+      "club_id": 489,
+      "club": "AC Milan",
+      "league_id": 135,
+      "league_name": "Serie A",
+      "country": "Italy",
+      "uefa_assoc": "Italy"
+    },
+    {
+      "name": "Timothy Weah",
+      "short_name": "Weah",
+      "player_id": 886,
+      "club_id": 496,
+      "club": "Juventus",
+      "league_id": 135,
+      "league_name": "Serie A",
+      "country": "Italy",
+      "uefa_assoc": "Italy"
+    },
+    {
+      "name": "Weston McKennie",
+      "short_name": "McKennie",
+      "player_id": 1291,
+      "club_id": 496,
+      "club": "Juventus",
+      "league_id": 135,
+      "league_name": "Serie A",
+      "country": "Italy",
+      "uefa_assoc": "Italy"
+    },
+    {
+      "name": "Yunus Musah",
+      "short_name": "Musah",
+      "player_id": 284,
+      "club_id": 489,
+      "club": "AC Milan",
+      "league_id": 135,
+      "league_name": "Serie A",
+      "country": "Italy",
+      "uefa_assoc": "Italy"
+    },
+    {
+      "name": "Gio Reyna",
+      "short_name": "Reyna",
+      "player_id": 1526,
+      "club_id": 165,
+      "club": "Borussia Dortmund",
+      "league_id": 78,
+      "league_name": "Bundesliga",
+      "country": "Germany",
+      "uefa_assoc": "Germany"
+    },
+    {
+      "name": "Joe Scally",
+      "short_name": "Scally",
+      "player_id": 2618,
+      "club_id": 176,
+      "club": "Borussia Mönchengladbach",
+      "league_id": 78,
+      "league_name": "Bundesliga",
+      "country": "Germany",
+      "uefa_assoc": "Germany"
+    },
+    {
+      "name": "Chris Richards",
+      "short_name": "Richards",
+      "player_id": 1379,
+      "club_id": 52,
+      "club": "Crystal Palace",
+      "league_id": 39,
+      "league_name": "Premier League",
+      "country": "England",
+      "uefa_assoc": "England"
+    },
+    {
+      "name": "Tyler Adams",
+      "short_name": "Adams",
+      "player_id": 1797,
+      "club_id": 49,
+      "club": "AFC Bournemouth",
+      "league_id": 39,
+      "league_name": "Premier League",
+      "country": "England",
+      "uefa_assoc": "England"
+    },
+    {
+      "name": "Sergino Dest",
+      "short_name": "Dest",
+      "player_id": 667,
+      "club_id": 197,
+      "club": "PSV Eindhoven",
+      "league_id": 88,
+      "league_name": "Eredivisie",
+      "country": "Netherlands",
+      "uefa_assoc": "Netherlands"
+    },
+    {
+      "name": "Folarin Balogun",
+      "short_name": "Balogun",
+      "player_id": 3819,
+      "club_id": 1683,
+      "club": "AS Monaco",
+      "league_id": 61,
+      "league_name": "Ligue 1",
+      "country": "France",
+      "uefa_assoc": "France"
+    }
+  ]
+}

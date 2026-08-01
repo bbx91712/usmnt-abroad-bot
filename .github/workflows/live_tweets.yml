@@ -1,0 +1,50 @@
+name: Live Match Tweets
+
+on:
+  schedule:
+    # Poll every 15 minutes during likely match windows
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: live-tweets
+  cancel-in-progress: false
+
+jobs:
+  live:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Poll live fixtures
+        run: python -m src.run_live_tweets
+        env:
+          RAPIDAPI_KEY: ${{ secrets.RAPIDAPI_KEY }}
+          API_FOOTBALL_HOST: ${{ vars.API_FOOTBALL_HOST || 'api-football-v1.p.rapidapi.com' }}
+          API_FOOTBALL_BASE_URL: ${{ vars.API_FOOTBALL_BASE_URL || 'https://api-football-v1.p.rapidapi.com/v3' }}
+          TWITTER_POST_ENABLED: ${{ vars.TWITTER_POST_ENABLED || '0' }}
+          TWITTER_BEARER_TOKEN: ${{ secrets.TWITTER_BEARER_TOKEN }}
+          TWITTER_API_KEY: ${{ secrets.TWITTER_API_KEY }}
+          TWITTER_API_SECRET: ${{ secrets.TWITTER_API_SECRET }}
+          TWITTER_ACCESS_TOKEN: ${{ secrets.TWITTER_ACCESS_TOKEN }}
+          TWITTER_ACCESS_SECRET: ${{ secrets.TWITTER_ACCESS_SECRET }}
+          DRY_RUN: ${{ vars.DRY_RUN || '1' }}
+          MOCK_DATA: ${{ vars.MOCK_DATA || '1' }}
+
+      - name: Commit state / outbox
+        if: always()
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: update live-tweet state"
+          file_pattern: state/state.json outbox/*.txt

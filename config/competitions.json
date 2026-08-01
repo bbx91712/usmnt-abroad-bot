@@ -1,0 +1,101 @@
+{
+  "season": 2025,
+  "competitions": {
+    "UCL": {
+      "name": "UEFA Champions League",
+      "league_id": 2,
+      "type": "european",
+      "country": "Europe"
+    },
+    "UEL": {
+      "name": "UEFA Europa League",
+      "league_id": 3,
+      "type": "european",
+      "country": "Europe"
+    },
+    "UECL": {
+      "name": "UEFA Conference League",
+      "league_id": 848,
+      "type": "european",
+      "country": "Europe"
+    },
+    "Premier League": {
+      "name": "Premier League",
+      "league_id": 39,
+      "type": "league",
+      "country": "England"
+    },
+    "La Liga": {
+      "name": "La Liga",
+      "league_id": 140,
+      "type": "league",
+      "country": "Spain"
+    },
+    "Serie A": {
+      "name": "Serie A",
+      "league_id": 135,
+      "type": "league",
+      "country": "Italy"
+    },
+    "Bundesliga": {
+      "name": "Bundesliga",
+      "league_id": 78,
+      "type": "league",
+      "country": "Germany"
+    },
+    "Ligue 1": {
+      "name": "Ligue 1",
+      "league_id": 61,
+      "type": "league",
+      "country": "France"
+    },
+    "Eredivisie": {
+      "name": "Eredivisie",
+      "league_id": 88,
+      "type": "league",
+      "country": "Netherlands"
+    },
+    "FA Cup": {
+      "name": "FA Cup",
+      "league_id": 45,
+      "type": "cup",
+      "country": "England"
+    },
+    "EFL Cup": {
+      "name": "EFL Cup",
+      "league_id": 48,
+      "type": "cup",
+      "country": "England"
+    },
+    "Copa del Rey": {
+      "name": "Copa del Rey",
+      "league_id": 143,
+      "type": "cup",
+      "country": "Spain"
+    },
+    "Coppa Italia": {
+      "name": "Coppa Italia",
+      "league_id": 137,
+      "type": "cup",
+      "country": "Italy"
+    },
+    "DFB-Pokal": {
+      "name": "DFB-Pokal",
+      "league_id": 81,
+      "type": "cup",
+      "country": "Germany"
+    },
+    "Coupe de France": {
+      "name": "Coupe de France",
+      "league_id": 66,
+      "type": "cup",
+      "country": "France"
+    },
+    "KNVB Cup": {
+      "name": "KNVB Cup",
+      "league_id": 132,
+      "type": "cup",
+      "country": "Netherlands"
+    }
+  }
+}

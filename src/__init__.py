@@ -1,0 +1,1 @@
+# usmnt-abroad-bot package

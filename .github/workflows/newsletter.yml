@@ -1,0 +1,34 @@
+name: Weekly USMNT Abroad Newsletter
+
+on:
+  schedule:
+    # Monday 12:00 UTC ≈ 8:00 AM ET / 7:00 AM EST
+    - cron: '0 12 * * 1'
+  workflow_dispatch:
+
+jobs:
+  newsletter:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run newsletter
+        run: python -m src.run_newsletter
+        env:
+          RAPIDAPI_KEY: ${{ secrets.RAPIDAPI_KEY }}
+          API_FOOTBALL_HOST: ${{ vars.API_FOOTBALL_HOST || 'api-football-v1.p.rapidapi.com' }}
+          API_FOOTBALL_BASE_URL: ${{ vars.API_FOOTBALL_BASE_URL || 'https://api-football-v1.p.rapidapi.com/v3' }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          RESEND_FROM: ${{ secrets.RESEND_FROM }}
+          RESEND_TO: ${{ secrets.RESEND_TO }}
+          DRY_RUN: ${{ vars.DRY_RUN || '0' }}
+          MOCK_DATA: ${{ vars.MOCK_DATA || '0' }}
