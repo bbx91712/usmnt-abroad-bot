@@ -50,7 +50,17 @@
       "link": "https://www.espn.com/espnplus/",
       "paid": true
     },
+    "EFL Cup": {
+      "primary": "ESPN+",
+      "link": "https://www.espn.com/espnplus/",
+      "paid": true
+    },
     "Copa del Rey": {
+      "primary": "ESPN+",
+      "link": "https://www.espn.com/espnplus/",
+      "paid": true
+    },
+    "Supercopa de Espana": {
       "primary": "ESPN+",
       "link": "https://www.espn.com/espnplus/",
       "paid": true
@@ -60,7 +70,17 @@
       "link": "https://www.paramountplus.com/",
       "paid": true
     },
+    "Supercoppa Italiana": {
+      "primary": "Paramount+",
+      "link": "https://www.paramountplus.com/",
+      "paid": true
+    },
     "DFB-Pokal": {
+      "primary": "ESPN+",
+      "link": "https://www.espn.com/espnplus/",
+      "paid": true
+    },
+    "DFL-Supercup": {
       "primary": "ESPN+",
       "link": "https://www.espn.com/espnplus/",
       "paid": true
@@ -70,7 +90,17 @@
       "link": "https://www.beinsports.com/us/",
       "paid": true
     },
+    "Trophee des Champions": {
+      "primary": "beIN SPORTS",
+      "link": "https://www.beinsports.com/us/",
+      "paid": true
+    },
     "KNVB Cup": {
+      "primary": "ESPN+",
+      "link": "https://www.espn.com/espnplus/",
+      "paid": true
+    },
+    "Johan Cruyff Shield": {
       "primary": "ESPN+",
       "link": "https://www.espn.com/espnplus/",
       "paid": true

@@ -54,9 +54,13 @@ def _league_block(client: APIFootballClient, player, league_id: int, name: str) 
     )
 
 
-def _cup_for_country(country: str) -> tuple[int, str] | None:
+def _cup_for_country(country: str, cup_type: str = "primary") -> tuple[int, str] | None:
     for key, comp in config.competitions()["competitions"].items():
-        if comp["type"] == "cup" and comp["country"] == country:
+        if (
+            comp["type"] == "cup"
+            and comp.get("cup_type", "primary") == cup_type
+            and comp["country"] == country
+        ):
             return comp["league_id"], comp["name"]
     return None
 
@@ -76,12 +80,20 @@ def _player_text(client: APIFootballClient, player) -> dict:
     other = "No active UEFA Europa League or Conference League fixture this week."
 
     # Domestic cup
-    cup_info = _cup_for_country(player.uefa_assoc)
+    cup_info = _cup_for_country(player.uefa_assoc, "primary")
     if cup_info:
         cup_id, cup_name = cup_info
         cup_block = _league_block(client, player, cup_id, cup_name)
     else:
         cup_block = "  Domestic cup: not tracked for this association."
+
+    # Additional domestic cup (e.g., EFL Cup, Supercoppa Italiana)
+    add_cup_info = _cup_for_country(player.uefa_assoc, "additional")
+    if add_cup_info:
+        add_cup_id, add_cup_name = add_cup_info
+        additional_cup_block = _league_block(client, player, add_cup_id, add_cup_name)
+    else:
+        additional_cup_block = "  Additional domestic cup: none for this association."
 
     header = f"{player.name}, {player.club}, {player.league_name} ({player.country})"
     text = (
@@ -89,6 +101,7 @@ def _player_text(client: APIFootballClient, player) -> dict:
         f"  Champions League status: {ucl}\n"
         f"  Other European competition: {other}\n"
         f"{cup_block}\n"
+        f"{additional_cup_block}\n"
         f"{league_block}"
     )
     return {
@@ -99,6 +112,7 @@ def _player_text(client: APIFootballClient, player) -> dict:
         "ucl": ucl,
         "other_europe": other,
         "cup": cup_block,
+        "additional_cup": additional_cup_block,
         "league": league_block,
         "text": text,
     }
@@ -128,6 +142,7 @@ def _render_html(player_data: list[dict]) -> str:
   <p><strong>Champions League status:</strong> {{ p.ucl }}</p>
   <p><strong>Other Europe:</strong> {{ p.other_europe }}</p>
   <pre>{{ p.cup }}</pre>
+  <pre>{{ p.additional_cup }}</pre>
   <pre>{{ p.league }}</pre>
   {% endfor %}
 </body>

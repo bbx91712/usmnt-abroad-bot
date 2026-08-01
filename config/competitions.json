@@ -59,42 +59,84 @@
       "name": "FA Cup",
       "league_id": 45,
       "type": "cup",
+      "cup_type": "primary",
       "country": "England"
     },
     "EFL Cup": {
       "name": "EFL Cup",
       "league_id": 48,
       "type": "cup",
+      "cup_type": "additional",
       "country": "England"
     },
     "Copa del Rey": {
       "name": "Copa del Rey",
       "league_id": 143,
       "type": "cup",
+      "cup_type": "primary",
+      "country": "Spain"
+    },
+    "Supercopa de Espana": {
+      "name": "Supercopa de España",
+      "league_id": 556,
+      "type": "cup",
+      "cup_type": "additional",
       "country": "Spain"
     },
     "Coppa Italia": {
       "name": "Coppa Italia",
       "league_id": 137,
       "type": "cup",
+      "cup_type": "primary",
+      "country": "Italy"
+    },
+    "Supercoppa Italiana": {
+      "name": "Supercoppa Italiana",
+      "league_id": 801,
+      "type": "cup",
+      "cup_type": "additional",
       "country": "Italy"
     },
     "DFB-Pokal": {
       "name": "DFB-Pokal",
       "league_id": 81,
       "type": "cup",
+      "cup_type": "primary",
+      "country": "Germany"
+    },
+    "DFL-Supercup": {
+      "name": "DFL-Supercup",
+      "league_id": 802,
+      "type": "cup",
+      "cup_type": "additional",
       "country": "Germany"
     },
     "Coupe de France": {
       "name": "Coupe de France",
       "league_id": 66,
       "type": "cup",
+      "cup_type": "primary",
+      "country": "France"
+    },
+    "Trophee des Champions": {
+      "name": "Trophée des Champions",
+      "league_id": 803,
+      "type": "cup",
+      "cup_type": "additional",
       "country": "France"
     },
     "KNVB Cup": {
       "name": "KNVB Cup",
       "league_id": 132,
       "type": "cup",
+      "cup_type": "primary",
+      "country": "Netherlands"
+    },
+    "Johan Cruyff Shield": {
+      "name": "Johan Cruyff Shield",
+      "league_id": 804,
+      "type": "cup",
+      "cup_type": "additional",
       "country": "Netherlands"
     }
   }
