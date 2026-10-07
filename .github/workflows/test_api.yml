@@ -1,0 +1,40 @@
+name: Test RapidAPI Key
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Test API-Football key
+        env:
+          RAPIDAPI_KEY: ${{ secrets.RAPIDAPI_KEY }}
+          API_FOOTBALL_HOST: ${{ vars.API_FOOTBALL_HOST || 'api-football-v1.p.rapidapi.com' }}
+          API_FOOTBALL_BASE_URL: ${{ vars.API_FOOTBALL_BASE_URL || 'https://api-football-v1.p.rapidapi.com/v3' }}
+          DRY_RUN: 0
+          MOCK_DATA: 0
+        run: |
+          python - << 'PY'
+          import sys
+          from src.api_football import APIFootballClient
+
+          client = APIFootballClient()
+          try:
+              data = client.get("leagues", country="England")
+              print(f"API key works. Fetched {len(data)} English league records.")
+          except Exception as e:
+              print(f"API test failed: {e}")
+              sys.exit(1)
+          PY
