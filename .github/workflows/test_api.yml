@@ -21,8 +21,8 @@ jobs:
       - name: Test API-Football key
         env:
           RAPIDAPI_KEY: ${{ secrets.RAPIDAPI_KEY }}
-          API_FOOTBALL_HOST: ${{ vars.API_FOOTBALL_HOST || 'api-football-v1.p.rapidapi.com' }}
-          API_FOOTBALL_BASE_URL: ${{ vars.API_FOOTBALL_BASE_URL || 'https://api-football-v1.p.rapidapi.com/v3' }}
+          API_FOOTBALL_HOST: ${{ vars.API_FOOTBALL_HOST || 'v3.football.api-sports.io' }}
+          API_FOOTBALL_BASE_URL: ${{ vars.API_FOOTBALL_BASE_URL || 'https://v3.football.api-sports.io' }}
           DRY_RUN: 0
           MOCK_DATA: 0
         run: |

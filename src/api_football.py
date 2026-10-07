@@ -44,10 +44,13 @@ class APIFootballClient:
             raise RuntimeError("RAPIDAPI_KEY is not configured")
 
         url = f"{self.base_url}/{endpoint}"
-        headers = {
-            "X-RapidAPI-Key": self.api_key,
-            "X-RapidAPI-Host": self.host,
-        }
+        if "api-sports.io" in self.host:
+            headers = {"x-apisports-key": self.api_key}
+        else:
+            headers = {
+                "X-RapidAPI-Key": self.api_key,
+                "X-RapidAPI-Host": self.host,
+            }
         for attempt in range(3):
             try:
                 resp = self.session.get(url, headers=headers, params=params, timeout=30)

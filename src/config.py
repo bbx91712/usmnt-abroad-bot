@@ -65,11 +65,11 @@ def rapidapi_key() -> str | None:
 
 
 def api_football_host() -> str:
-    return _env("API_FOOTBALL_HOST", "api-football-v1.p.rapidapi.com")
+    return _env("API_FOOTBALL_HOST", "v3.football.api-sports.io")
 
 
 def api_football_base() -> str:
-    return _env("API_FOOTBALL_BASE_URL", "https://api-football-v1.p.rapidapi.com/v3")
+    return _env("API_FOOTBALL_BASE_URL", "https://v3.football.api-sports.io")
 
 
 def dry_run() -> bool:
