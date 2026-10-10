@@ -59,7 +59,11 @@ class APIFootballClient:
                     continue
                 resp.raise_for_status()
                 payload = resp.json()
+                if "errors" in payload:
+                    raise RuntimeError(f"API-Football error on {endpoint}: {payload['errors']}")
                 data = payload.get("response", [])
+                if not self.dry_run:
+                    print(f"[API] {endpoint} {params} -> {len(data)} results")
                 self._cache[key] = data
                 return data
             except requests.RequestException:
