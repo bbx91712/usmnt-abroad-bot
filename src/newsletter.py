@@ -123,7 +123,15 @@ def _competition_type(league_id: int) -> str:
     return "league"
 
 
-def _league_block(client: APIFootballClient, player, league_id: int, name: str, comp_format: str | None = None, comp_context: str | None = None) -> str:
+def _league_block(
+    client: APIFootballClient,
+    player,
+    league_id: int,
+    name: str,
+    comp_format: str | None = None,
+    comp_context: str | None = None,
+    comp_no_fixture_text: str | None = None,
+) -> str:
     last, next_ = fixtures.get_last_next(client, player.club_id, league_id)
     watch = broadcasters.resolve(name)
     stats = _player_stats(client, player, league_id)
@@ -159,6 +167,11 @@ def _league_block(client: APIFootballClient, player, league_id: int, name: str, 
         prefix = _round_prefix(next_) if round_for_lines else ""
         next_line = f"{prefix}{date} vs {opp}; watch: {watch['name']} ({watch['link']})"
 
+    if not last and not next_ and comp_no_fixture_text:
+        return (
+            f"  {name}:\n"
+            f"    {comp_no_fixture_text}\n"
+        )
     if not last and not next_ and comp_context:
         note_line = f"    {comp_context}\n" if comp_context else ""
         return (
@@ -177,14 +190,20 @@ def _league_block(client: APIFootballClient, player, league_id: int, name: str, 
     )
 
 
-def _cup_for_country(country: str, cup_type: str = "primary") -> tuple[int, str, str | None, str | None] | None:
+def _cup_for_country(country: str, cup_type: str = "primary") -> tuple[int, str, str | None, str | None, str | None] | None:
     for key, comp in config.competitions()["competitions"].items():
         if (
             comp["type"] == "cup"
             and comp.get("cup_type", "primary") == cup_type
             and comp["country"] == country
         ):
-            return comp["league_id"], comp["name"], comp.get("format"), comp.get("context")
+            return (
+                comp["league_id"],
+                comp["name"],
+                comp.get("format"),
+                comp.get("context"),
+                comp.get("no_fixture_text"),
+            )
     return None
 
 
@@ -303,16 +322,16 @@ def _player_text(client: APIFootballClient, player) -> dict:
     # Domestic cup
     cup_info = _cup_for_country(player.uefa_assoc, "primary")
     if cup_info:
-        cup_id, cup_name, cup_format, cup_context = cup_info
-        cup_block = _league_block(client, player, cup_id, cup_name, cup_format, cup_context)
+        cup_id, cup_name, cup_format, cup_context, cup_no_fixture_text = cup_info
+        cup_block = _league_block(client, player, cup_id, cup_name, cup_format, cup_context, cup_no_fixture_text)
     else:
         cup_block = "  Domestic cup: not tracked for this association."
 
     # Additional domestic cup (e.g., EFL Cup, Supercoppa Italiana)
     add_cup_info = _cup_for_country(player.uefa_assoc, "additional")
     if add_cup_info:
-        add_cup_id, add_cup_name, add_cup_format, add_cup_context = add_cup_info
-        additional_cup_block = _league_block(client, player, add_cup_id, add_cup_name, add_cup_format, add_cup_context)
+        add_cup_id, add_cup_name, add_cup_format, add_cup_context, add_cup_no_fixture_text = add_cup_info
+        additional_cup_block = _league_block(client, player, add_cup_id, add_cup_name, add_cup_format, add_cup_context, add_cup_no_fixture_text)
     else:
         additional_cup_block = "  Additional domestic cup: none for this association."
 

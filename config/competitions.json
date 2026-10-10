@@ -70,6 +70,7 @@
       "type": "cup",
       "cup_type": "primary",
       "format": "Knockout cup; the winner of each tie advances to the next round and the loser is eliminated",
+      "no_fixture_text": "Premier League and Championship clubs join the draw for Third Round Proper (January 2027)",
       "country": "England"
     },
     "EFL Cup": {
