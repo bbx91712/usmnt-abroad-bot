@@ -101,21 +101,33 @@ def _league_total_games(league_id: int) -> int | None:
     return None
 
 
+def _competition_type(league_id: int) -> str:
+    for comp in config.competitions()["competitions"].values():
+        if comp.get("league_id") == league_id:
+            return comp.get("type", "league")
+    return "league"
+
+
 def _league_block(client: APIFootballClient, player, league_id: int, name: str) -> str:
-    summary = standings.get_team_summary(client, player.club_id, league_id)
     last = fixtures.get_last(client, player.club_id, league_id)
     next_ = fixtures.get_next(client, player.club_id, league_id)
     watch = broadcasters.resolve(name)
     stats = _player_stats(client, player, league_id)
-    total = _league_total_games(league_id)
 
-    if summary:
-        if total is not None:
-            pos_line = f"{summary['rank']} in {name}, {summary['points']} points through {summary['played']} of {total} matches"
+    comp_type = _competition_type(league_id)
+    if comp_type == "league":
+        summary = standings.get_team_summary(client, player.club_id, league_id)
+        total = _league_total_games(league_id)
+        if summary:
+            if total is not None:
+                pos_line = f"{summary['rank']} in {name}, {summary['points']} points through {summary['played']} of {total} matches"
+            else:
+                pos_line = f"{summary['rank']} in {name}"
         else:
-            pos_line = f"{summary['rank']} in {name}"
+            pos_line = f"{name} table not yet available"
     else:
-        pos_line = f"{name} table not yet available"
+        status = fixtures.cup_status(client, player.club_id, league_id)
+        pos_line = status or f"{name} table not yet available"
     last_line = "No result yet"
     if last:
         opp = fixtures.opponent_name(last, player.club_id)

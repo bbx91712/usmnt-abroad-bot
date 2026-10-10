@@ -84,3 +84,30 @@ def format_date_et(date_str: str) -> str:
 
 def status_short(fixture: dict) -> str:
     return fixture.get("fixture", {}).get("status", {}).get("short", "?")
+
+
+def cup_status(
+    client: APIFootballClient, team_id: int, league_id: int, season: int | None = None
+) -> str | None:
+    """Return a knockout-cup status (e.g., 'Advanced to Round 4') for a team."""
+    season = season or _season()
+    last = get_last(client, team_id, league_id, season)
+    next_ = get_next(client, team_id, league_id, season)
+    if not last and not next_:
+        return "No fixture scheduled"
+    if last:
+        last_round = last.get("league", {}).get("round", "this round")
+        home_id = last["teams"]["home"]["id"]
+        winner = last["teams"]["home"]["winner"] if home_id == team_id else last["teams"]["away"]["winner"]
+        if winner is True:
+            if next_:
+                next_round = next_.get("league", {}).get("round", "the next round")
+                return f"Advanced to {next_round}"
+            return f"Won {last_round}"
+        if winner is False:
+            return f"Eliminated in {last_round}"
+        return f"Draw in {last_round}"
+    if next_:
+        next_round = next_.get("league", {}).get("round", "the next round")
+        return f"Upcoming {next_round}"
+    return None
