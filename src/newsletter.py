@@ -139,6 +139,8 @@ def _league_block(client: APIFootballClient, player, league_id: int, name: str, 
                 pos_line = f"{_ordinal(summary['rank'])} in {name}"
         else:
             pos_line = f"{name} table not yet available"
+    elif not last and not next_ and comp_context:
+        pos_line = "Did not qualify"
     else:
         status = fixtures.cup_status_from_fixtures(last, next_, player.club_id)
         pos_line = status or f"{name} table not yet available"
@@ -157,13 +159,14 @@ def _league_block(client: APIFootballClient, player, league_id: int, name: str, 
         prefix = _round_prefix(next_) if round_for_lines else ""
         next_line = f"{prefix}{date} vs {opp}; watch: {watch['name']} ({watch['link']})"
 
-    format_line = f"    ({comp_format})\n" if comp_format else ""
-    context_line = f"    Context: {comp_context}\n" if comp_context else ""
+    if not last and not next_ and comp_context:
+        note_line = f"    {comp_context}\n" if comp_context else ""
+    else:
+        note_line = f"    ({comp_format})\n" if comp_format else ""
     return (
         f"  {name}:\n"
         f"    Current standing: {pos_line}\n"
-        f"{format_line}"
-        f"{context_line}"
+        f"{note_line}"
         f"    Player stats: {stats}\n"
         f"    Last match: {last_line}\n"
         f"    Next match: {next_line}"
