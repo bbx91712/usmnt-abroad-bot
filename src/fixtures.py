@@ -13,30 +13,40 @@ def _season() -> int:
     return config.competitions()["season"]
 
 
-def _fetch(client: APIFootballClient, team_id: int, league_id: int, which: str, season: int | None) -> list[dict]:
+def _fetch_all(client: APIFootballClient, team_id: int, league_id: int, season: int | None = None) -> list[dict]:
     season = season or _season()
-    kwargs = {which: 1}
-    return client.get("fixtures", team=team_id, league=league_id, season=season, **kwargs)
+    return client.get("fixtures", team=team_id, league=league_id, season=season)
 
 
-def _belongs_to_league(fixture: dict, league_id: int) -> bool:
-    return fixture.get("league", {}).get("id") == league_id
+def _status_short(fixture: dict) -> str:
+    return fixture.get("fixture", {}).get("status", {}).get("short", "")
+
+
+def get_last_next(
+    client: APIFootballClient, team_id: int, league_id: int, season: int | None = None
+) -> tuple[dict | None, dict | None]:
+    """Return the most recent finished and the next scheduled fixture for a team in a competition."""
+    fixtures = _fetch_all(client, team_id, league_id, season)
+    finished = [f for f in fixtures if _status_short(f) in ("FT", "AET", "PEN")]
+    finished.sort(key=lambda f: f["fixture"]["date"], reverse=True)
+    last = finished[0] if finished else None
+    upcoming = [
+        f for f in fixtures
+        if _status_short(f) in ("NS", "TBD") and f.get("fixture", {}).get("date")
+    ]
+    upcoming.sort(key=lambda f: f["fixture"]["date"])
+    next_ = upcoming[0] if upcoming else None
+    return last, next_
 
 
 def get_last(client: APIFootballClient, team_id: int, league_id: int, season: int | None = None) -> dict | None:
-    fixtures = _fetch(client, team_id, league_id, "last", season)
-    for fixture in fixtures:
-        if _belongs_to_league(fixture, league_id):
-            return fixture
-    return None
+    last, _ = get_last_next(client, team_id, league_id, season)
+    return last
 
 
 def get_next(client: APIFootballClient, team_id: int, league_id: int, season: int | None = None) -> dict | None:
-    fixtures = _fetch(client, team_id, league_id, "next", season)
-    for fixture in fixtures:
-        if _belongs_to_league(fixture, league_id):
-            return fixture
-    return None
+    _, next_ = get_last_next(client, team_id, league_id, season)
+    return next_
 
 
 def get_live(client: APIFootballClient, **params) -> list[dict]:
@@ -127,6 +137,5 @@ def cup_status(
 ) -> str | None:
     """Return a knockout-cup status (e.g., 'Advanced to Round 4') for a team."""
     season = season or _season()
-    last = get_last(client, team_id, league_id, season)
-    next_ = get_next(client, team_id, league_id, season)
+    last, next_ = get_last_next(client, team_id, league_id, season)
     return cup_status_from_fixtures(last, next_, team_id)

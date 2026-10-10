@@ -19,6 +19,13 @@ def _ordinal(n: int) -> str:
     return f"{n}{suffix}"
 
 
+def _round_prefix(fixture: dict | None) -> str:
+    if not fixture:
+        return ""
+    round_ = fixture.get("league", {}).get("round")
+    return f"({round_}) " if round_ else ""
+
+
 def _matches_name(api_player: dict, player) -> bool:
     target_first = (player.name.split()[0] or "").lower()
     target_last = player.name.split()[-1].lower()
@@ -117,8 +124,7 @@ def _competition_type(league_id: int) -> str:
 
 
 def _league_block(client: APIFootballClient, player, league_id: int, name: str, comp_format: str | None = None) -> str:
-    last = fixtures.get_last(client, player.club_id, league_id)
-    next_ = fixtures.get_next(client, player.club_id, league_id)
+    last, next_ = fixtures.get_last_next(client, player.club_id, league_id)
     watch = broadcasters.resolve(name)
     stats = _player_stats(client, player, league_id)
 
@@ -134,19 +140,22 @@ def _league_block(client: APIFootballClient, player, league_id: int, name: str, 
         else:
             pos_line = f"{name} table not yet available"
     else:
-        status = fixtures.cup_status(client, player.club_id, league_id)
+        status = fixtures.cup_status_from_fixtures(last, next_, player.club_id)
         pos_line = status or f"{name} table not yet available"
+    round_for_lines = comp_type != "league"
     last_line = "No result yet"
     if last:
         opp = fixtures.opponent_name(last, player.club_id)
         result = fixtures.result_for_team(last, player.club_id)
         date = fixtures.format_date_et(last["fixture"]["date"])
-        last_line = f"{date} vs {opp}: {result}"
+        prefix = _round_prefix(last) if round_for_lines else ""
+        last_line = f"{prefix}{date} vs {opp}: {result}"
     next_line = "No upcoming fixture"
     if next_:
         opp = fixtures.opponent_name(next_, player.club_id)
         date = fixtures.format_date_et(next_["fixture"]["date"])
-        next_line = f"{date} vs {opp}; watch: {watch['name']} ({watch['link']})"
+        prefix = _round_prefix(next_) if round_for_lines else ""
+        next_line = f"{prefix}{date} vs {opp}; watch: {watch['name']} ({watch['link']})"
 
     format_line = f"    ({comp_format})\n" if comp_format else ""
     return (
@@ -185,8 +194,7 @@ def _european_status(client: APIFootballClient, player) -> list[dict]:
             continue
         league_id = comp["league_id"]
         name = comp["name"]
-        last = fixtures.get_last(client, player.club_id, league_id)
-        next_ = fixtures.get_next(client, player.club_id, league_id)
+        last, next_ = fixtures.get_last_next(client, player.club_id, league_id)
         active = bool(last or next_)
         entry = {
             "key": key,
@@ -229,13 +237,13 @@ def _other_europe_text(client: APIFootballClient, player, european: list[dict]) 
             opp = fixtures.opponent_name(last, player.club_id)
             result = fixtures.result_for_team(last, player.club_id)
             date = fixtures.format_date_et(last["fixture"]["date"])
-            last_line = f"{date} vs {opp}: {result}"
+            last_line = f"{_round_prefix(last)}{date} vs {opp}: {result}"
         next_line = "No upcoming fixture"
         if next_:
             opp = fixtures.opponent_name(next_, player.club_id)
             date = fixtures.format_date_et(next_["fixture"]["date"])
             watch = broadcasters.resolve(e["key"])
-            next_line = f"{date} vs {opp}; watch: {watch['name']} ({watch['link']})"
+            next_line = f"{_round_prefix(next_)}{date} vs {opp}; watch: {watch['name']} ({watch['link']})"
         stats = _player_stats(client, player, e["league_id"])
         format_line = f"    ({e['format']})\n" if e.get("format") else ""
         blocks.append(
