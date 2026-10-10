@@ -26,6 +26,23 @@ def _round_prefix(fixture: dict | None) -> str:
     return f"({round_}) " if round_ else ""
 
 
+def _match_stats(client: APIFootballClient, player, fixture: dict | None, league_id: int) -> str:
+    if not fixture:
+        return ""
+    data = fixtures.player_fixture_stats(
+        client, player.player_id, fixture["fixture"]["id"], league_id
+    )
+    if not data:
+        return ""
+    stats = data.get("statistics", [{}])[0]
+    minutes = stats.get("games", {}).get("minutes") or 0
+    goals = stats.get("goals", {}).get("total") or 0
+    assists = stats.get("goals", {}).get("assists") or 0
+    if minutes or goals or assists:
+        return f"(Goals: {goals}, Assists: {assists}, Minutes: {minutes})"
+    return ""
+
+
 def _matches_name(api_player: dict, player) -> bool:
     target_first = (player.name.split()[0] or "").lower()
     target_last = player.name.split()[-1].lower()
@@ -159,7 +176,9 @@ def _league_block(
         result = fixtures.result_for_team(last, player.club_id)
         date = fixtures.format_date_et(last["fixture"]["date"])
         prefix = _round_prefix(last) if round_for_lines else ""
-        last_line = f"{prefix}{date} vs {opp}: {result}"
+        match_stats = _match_stats(client, player, last, league_id)
+        stats_suffix = f" {match_stats}" if match_stats else ""
+        last_line = f"{prefix}{date} vs {opp}: {result}{stats_suffix}"
     next_line = "No upcoming fixture"
     if next_:
         opp = fixtures.opponent_name(next_, player.club_id)
@@ -265,7 +284,9 @@ def _other_europe_text(client: APIFootballClient, player, european: list[dict]) 
             opp = fixtures.opponent_name(last, player.club_id)
             result = fixtures.result_for_team(last, player.club_id)
             date = fixtures.format_date_et(last["fixture"]["date"])
-            last_line = f"{_round_prefix(last)}{date} vs {opp}: {result}"
+            match_stats = _match_stats(client, player, last, e["league_id"])
+            stats_suffix = f" {match_stats}" if match_stats else ""
+            last_line = f"{_round_prefix(last)}{date} vs {opp}: {result}{stats_suffix}"
         next_line = "No upcoming fixture"
         if next_:
             opp = fixtures.opponent_name(next_, player.club_id)
