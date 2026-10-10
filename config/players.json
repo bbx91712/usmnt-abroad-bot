@@ -14,13 +14,13 @@
     {
       "name": "Timothy Weah",
       "short_name": "Weah",
-      "player_id": 886,
-      "club_id": 496,
-      "club": "Juventus",
-      "league_id": 135,
-      "league_name": "Serie A",
-      "country": "Italy",
-      "uefa_assoc": "Italy"
+      "player_id": 1138,
+      "club_id": 81,
+      "club": "Marseille",
+      "league_id": 61,
+      "league_name": "Ligue 1",
+      "country": "France",
+      "uefa_assoc": "France"
     },
     {
       "name": "Weston McKennie",
@@ -47,13 +47,13 @@
     {
       "name": "Gio Reyna",
       "short_name": "Reyna",
-      "player_id": 1526,
-      "club_id": 165,
-      "club": "Borussia Dortmund",
-      "league_id": 78,
-      "league_name": "Bundesliga",
-      "country": "Germany",
-      "uefa_assoc": "Germany"
+      "player_id": 161921,
+      "club_id": 95,
+      "club": "Strasbourg",
+      "league_id": 61,
+      "league_name": "Ligue 1",
+      "country": "France",
+      "uefa_assoc": "France"
     },
     {
       "name": "Joe Scally",
