@@ -161,8 +161,8 @@ def _cup_for_country(country: str, cup_type: str = "primary") -> tuple[int, str]
 
 
 def _other_europe_text(client: APIFootballClient, player) -> str:
-    """Return last/next fixtures for UCL/UEL/UECL, or a fallback message."""
-    parts = []
+    """Return a FA-Cup-style block for UCL/UEL/UECL, or a fallback block."""
+    blocks = []
     for key, comp in config.competitions()["competitions"].items():
         if comp.get("type") != "european":
             continue
@@ -172,21 +172,45 @@ def _other_europe_text(client: APIFootballClient, player) -> str:
         next_ = fixtures.get_next(client, player.club_id, league_id)
         if not last and not next_:
             continue
-        subparts = []
+        summary = standings.get_team_summary(client, player.club_id, league_id)
+        if summary:
+            pos_line = (
+                f"{summary['rank']} in {name}, "
+                f"{summary['points']} points through {summary['played']} matches"
+            )
+        else:
+            pos_line = fixtures.cup_status(client, player.club_id, league_id)
+            if not pos_line:
+                pos_line = f"{name} table not yet available"
+        last_line = "No result yet"
         if last:
             opp = fixtures.opponent_name(last, player.club_id)
             result = fixtures.result_for_team(last, player.club_id)
             date = fixtures.format_date_et(last["fixture"]["date"])
-            subparts.append(f"last {date} vs {opp}: {result}")
+            last_line = f"{date} vs {opp}: {result}"
+        next_line = "No upcoming fixture"
         if next_:
             opp = fixtures.opponent_name(next_, player.club_id)
             date = fixtures.format_date_et(next_["fixture"]["date"])
             watch = broadcasters.resolve(key)
-            subparts.append(f"next {date} vs {opp} (watch: {watch['name']} {watch['link']})")
-        parts.append(f"{name}: {'; '.join(subparts)}")
-    if not parts:
-        return "No active UEFA fixture this week."
-    return " ".join(parts)
+            next_line = f"{date} vs {opp}; watch: {watch['name']} ({watch['link']})"
+        stats = _player_stats(client, player, league_id)
+        blocks.append(
+            f"  {name}:\n"
+            f"    Current standing: {pos_line}\n"
+            f"    Player stats: {stats}\n"
+            f"    Last match: {last_line}\n"
+            f"    Next match: {next_line}"
+        )
+    if not blocks:
+        return (
+            "  Other European competition:\n"
+            "    Current standing: No fixture scheduled\n"
+            "    Player stats: n/a\n"
+            "    Last match: No result yet\n"
+            "    Next match: No upcoming fixture"
+        )
+    return "\n\n".join(blocks)
 
 
 def _player_text(client: APIFootballClient, player) -> dict:
@@ -223,7 +247,7 @@ def _player_text(client: APIFootballClient, player) -> dict:
     text = (
         f"{header}\n"
         f"  Champions League status: {ucl}\n"
-        f"  Other European competition: {other}\n"
+        f"{other}\n"
         f"{cup_block}\n"
         f"{additional_cup_block}\n"
         f"{league_block}"
@@ -267,7 +291,7 @@ def _render_html(player_data: list[dict]) -> str:
   {% for p in players %}
   <h2>{{ p.name }} - {{ p.club }} ({{ p.league_name }})</h2>
   <p><strong>Champions League status:</strong> {{ p.ucl }}</p>
-  <p><strong>Other Europe:</strong> {{ p.other_europe }}</p>
+  <pre>{{ p.other_europe }}</pre>
   <pre>{{ p.cup }}</pre>
   <pre>{{ p.additional_cup }}</pre>
   <pre>{{ p.league }}</pre>
