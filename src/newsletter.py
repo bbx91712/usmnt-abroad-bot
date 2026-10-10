@@ -33,14 +33,14 @@ def _match_stats(client: APIFootballClient, player, fixture: dict | None, league
         client, player.player_id, fixture["fixture"]["id"], league_id
     )
     if not data:
-        return ""
+        return "(Did not feature)"
     stats = data.get("statistics", [{}])[0]
     minutes = stats.get("games", {}).get("minutes") or 0
     goals = stats.get("goals", {}).get("total") or 0
     assists = stats.get("goals", {}).get("assists") or 0
     if minutes or goals or assists:
         return f"(Goals: {goals}, Assists: {assists}, Minutes: {minutes})"
-    return ""
+    return "(Did not feature)"
 
 
 def _matches_name(api_player: dict, player) -> bool:
