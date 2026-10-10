@@ -259,11 +259,10 @@ def _other_europe_text(client: APIFootballClient, player, european: list[dict]) 
 
 def _ucl_status(client: APIFootballClient, player, european: list[dict]) -> str:
     """Return the 2027-28 UCL qualification paths for the player's club."""
-    position = standings.get_team_position(client, player.club_id, player.league_id)
     spots = _ucl_spots_for_league(player.league_id)
     active = {e["key"] for e in european if e["active"]}
     paths = []
-    if position is not None and spots is not None:
+    if spots is not None:
         paths.append(f"a top-{spots} finish in {player.league_name}")
     else:
         paths.append(f"a strong domestic finish in {player.league_name}")
