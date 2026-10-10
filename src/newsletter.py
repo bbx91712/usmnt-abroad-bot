@@ -3,12 +3,45 @@ from __future__ import annotations
 
 from jinja2 import Template
 
-from . import broadcasters, config, fixtures, rankings, standings
+from . import broadcasters, config, fixtures, players as players_mod, rankings, standings
 from .api_football import APIFootballClient
 
 
 def _season() -> int:
     return config.competitions()["season"]
+
+
+def _resolve_player(client: APIFootballClient, player) -> None:
+    """Update player with current club/league from the API."""
+    data = client.get("players", id=player.player_id, season=_season())
+    if data:
+        stats_list = data[0].get("statistics", [])
+        stats = next(
+            (s for s in stats_list if s.get("league", {}).get("id") == player.league_id),
+            stats_list[0] if stats_list else None,
+        )
+    else:
+        # Stored id may be stale or the player moved; search by short name
+        search = client.get("players", search=player.short_name, season=_season())
+        stats = None
+        for entry in search or []:
+            if player.short_name.lower() in entry.get("player", {}).get("name", "").lower():
+                stats_list = entry.get("statistics", [])
+                stats = stats_list[0] if stats_list else None
+                player.player_id = entry["player"]["id"]
+                break
+    if not stats:
+        return
+    team = stats.get("team", {})
+    league = stats.get("league", {})
+    if team.get("id"):
+        player.club_id = team["id"]
+        player.club = team.get("name", player.club)
+    if league.get("id"):
+        player.league_id = league["id"]
+        player.league_name = league.get("name", player.league_name)
+        player.country = league.get("country", player.country)
+        player.uefa_assoc = league.get("country", player.uefa_assoc)
 
 
 def _player_stats(client: APIFootballClient, player, league_id: int) -> str:
@@ -135,7 +168,10 @@ def _player_text(client: APIFootballClient, player) -> dict:
 
 
 def build(client: APIFootballClient) -> dict[str, str]:
-    players = rankings.sort_players(client)
+    player_list = players_mod.load_players()
+    for p in player_list:
+        _resolve_player(client, p)
+    players = rankings.sort_players(client, player_list)
     player_data = [_player_text(client, p) for p in players]
 
     text = "\n\n".join(p["text"] for p in player_data)
