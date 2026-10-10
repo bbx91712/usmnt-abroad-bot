@@ -120,10 +120,12 @@ def _player_stats(client: APIFootballClient, player, league_id: int) -> str:
     games = stats_obj.get("games", {})
     goals = stats_obj.get("goals", {})
     apps = games.get("appearences", 0) or 0
+    starts = games.get("lineups", 0) or 0
     minutes = games.get("minutes", 0) or 0
     g = goals.get("total", 0) or 0
     a = goals.get("assists", 0) or 0
-    return f"{apps} apps, {g} goals, {a} assists, {minutes} minutes"
+    mpg = round(minutes / apps) if apps else 0
+    return f"{apps} apps ({starts} starts), {g} goals, {a} assists, {mpg} min / game"
 
 
 def _league_total_games(league_id: int) -> int | None:
