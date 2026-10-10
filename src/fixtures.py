@@ -61,10 +61,12 @@ def get_lineups(client: APIFootballClient, fixture_id: int) -> list[dict]:
     return client.get("fixtures/lineups", fixture=fixture_id)
 
 
-def player_fixture_stats(client: APIFootballClient, player_id: int, fixture_id: int, league_id: int, season: int | None = None) -> dict:
-    season = season or _season()
-    data = client.get("players", id=player_id, fixture=fixture_id, league=league_id, season=season)
-    return data[0] if data else {}
+def player_fixture_stats(client: APIFootballClient, player_id: int, fixture_id: int, league_id: int | None = None, season: int | None = None) -> dict:
+    data = client.get("fixtures/players", fixture=fixture_id)
+    for entry in data:
+        if entry.get("player", {}).get("id") == player_id:
+            return entry
+    return {}
 
 
 def opponent_name(fixture: dict, team_id: int) -> str:
