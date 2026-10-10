@@ -11,8 +11,17 @@ def _season() -> int:
     return config.competitions()["season"]
 
 
-def _player_stats(client: APIFootballClient, player_id: int, league_id: int) -> str:
-    data = client.get("players", id=player_id, season=_season())
+def _player_stats(client: APIFootballClient, player, league_id: int) -> str:
+    data = client.get("players", id=player.player_id, season=_season())
+    if not data:
+        # Stored player id may be stale; look up by name in the current squad
+        squad = client.get("players/squads", team=player.club_id)
+        for member in squad:
+            member_name = member.get("player", {}).get("name", "").lower()
+            if player.short_name.lower() in member_name or player.name.lower() in member_name:
+                data = client.get("players", id=member["player"]["id"], season=_season())
+                if data:
+                    break
     if not data:
         return "n/a"
     stats_list = data[0].get("statistics", [])
@@ -34,7 +43,7 @@ def _league_block(client: APIFootballClient, player, league_id: int, name: str) 
     last = fixtures.get_last(client, player.club_id, league_id)
     next_ = fixtures.get_next(client, player.club_id, league_id)
     watch = broadcasters.resolve(name)
-    stats = _player_stats(client, player.player_id, league_id)
+    stats = _player_stats(client, player, league_id)
 
     pos_line = f"{position} in {name}" if position else f"{name} table not yet available"
     last_line = "No result yet"
