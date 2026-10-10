@@ -160,6 +160,35 @@ def _cup_for_country(country: str, cup_type: str = "primary") -> tuple[int, str]
     return None
 
 
+def _other_europe_text(client: APIFootballClient, player) -> str:
+    """Return last/next fixtures for UCL/UEL/UECL, or a fallback message."""
+    parts = []
+    for key, comp in config.competitions()["competitions"].items():
+        if comp.get("type") != "european":
+            continue
+        league_id = comp["league_id"]
+        name = comp["name"]
+        last = fixtures.get_last(client, player.club_id, league_id)
+        next_ = fixtures.get_next(client, player.club_id, league_id)
+        if not last and not next_:
+            continue
+        subparts = []
+        if last:
+            opp = fixtures.opponent_name(last, player.club_id)
+            result = fixtures.result_for_team(last, player.club_id)
+            date = fixtures.format_date_et(last["fixture"]["date"])
+            subparts.append(f"last {date} vs {opp}: {result}")
+        if next_:
+            opp = fixtures.opponent_name(next_, player.club_id)
+            date = fixtures.format_date_et(next_["fixture"]["date"])
+            watch = broadcasters.resolve(key)
+            subparts.append(f"next {date} vs {opp} (watch: {watch['name']} {watch['link']})")
+        parts.append(f"{name}: {'; '.join(subparts)}")
+    if not parts:
+        return "No active UEFA fixture this week."
+    return " ".join(parts)
+
+
 def _player_text(client: APIFootballClient, player) -> dict:
     # League block
     league_block = _league_block(client, player, player.league_id, player.league_name)
@@ -171,8 +200,8 @@ def _player_text(client: APIFootballClient, player) -> dict:
     else:
         ucl = f"{player.club} is outside the UCL qualification places in {player.league_name}."
 
-    # Other Europe - mock static for now
-    other = "No active UEFA Europa League or Conference League fixture this week."
+    # Other Europe
+    other = _other_europe_text(client, player)
 
     # Domestic cup
     cup_info = _cup_for_country(player.uefa_assoc, "primary")
