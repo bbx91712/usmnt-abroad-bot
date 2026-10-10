@@ -11,24 +11,48 @@ def _season() -> int:
     return config.competitions()["season"]
 
 
+def _candidate_leagues() -> list[int]:
+    """Return the configured domestic league IDs."""
+    return sorted(
+        comp["league_id"]
+        for comp in config.competitions()["competitions"].values()
+        if comp["type"] == "league"
+    )
+
+
+def _matches_name(entry_name: str, player) -> bool:
+    name = player.name.lower()
+    short = player.short_name.lower()
+    entry = (entry_name or "").lower()
+    return short in entry or name.split()[-1] in entry or name in entry
+
+
 def _resolve_player(client: APIFootballClient, player) -> None:
     """Update player with current club/league from the API."""
+    stats = None
     data = client.get("players", id=player.player_id, season=_season())
-    if data:
+    if data and _matches_name(data[0].get("player", {}).get("name", ""), player):
         stats_list = data[0].get("statistics", [])
         stats = next(
             (s for s in stats_list if s.get("league", {}).get("id") == player.league_id),
             stats_list[0] if stats_list else None,
         )
-    else:
-        # Stored id may be stale or the player moved; search by short name in the stored league
-        search = client.get("players", search=player.short_name, league=player.league_id, season=_season())
-        stats = None
-        for entry in search or []:
-            if player.short_name.lower() in entry.get("player", {}).get("name", "").lower():
-                stats_list = entry.get("statistics", [])
-                stats = stats_list[0] if stats_list else None
-                player.player_id = entry["player"]["id"]
+    if not stats:
+        # Stored id may be stale or the player moved; search by short name across top leagues
+        league_ids = _candidate_leagues()
+        if player.league_id in league_ids:
+            league_ids.remove(player.league_id)
+            league_ids.insert(0, player.league_id)
+        for league_id in league_ids:
+            search = client.get("players", search=player.short_name, league=league_id, season=_season())
+            for entry in search or []:
+                if _matches_name(entry.get("player", {}).get("name", ""), player):
+                    stats_list = entry.get("statistics", [])
+                    if stats_list:
+                        stats = stats_list[0]
+                        player.player_id = entry["player"]["id"]
+                        break
+            if stats:
                 break
     if not stats:
         return
