@@ -208,11 +208,10 @@ def _european_status(client: APIFootballClient, player) -> list[dict]:
 
 
 def _other_europe_text(client: APIFootballClient, player, european: list[dict]) -> str:
-    """Return a FA-Cup-style block for UCL/UEL/UECL, always listing all three."""
+    """Return a FA-Cup-style block for each active UCL/UEL/UECL competition."""
     blocks = []
     for e in european:
         if not e["active"]:
-            blocks.append(f"  {e['name']}:\n    Status: Not in this season's competition")
             continue
         if e["summary"]:
             pos_line = (
@@ -302,10 +301,11 @@ def _player_text(client: APIFootballClient, player) -> dict:
         additional_cup_block = "  Additional domestic cup: none for this association."
 
     header = f"{player.name}, {player.club}, {player.league_name} ({player.country})"
+    other_section = f"{other}\n" if other else ""
     text = (
         f"{header}\n"
         f"{ucl}\n"
-        f"{other}\n"
+        f"{other_section}"
         f"{cup_block}\n"
         f"{additional_cup_block}\n"
         f"{league_block}"
@@ -349,7 +349,7 @@ def _render_html(player_data: list[dict]) -> str:
   {% for p in players %}
   <h2>{{ p.name }} - {{ p.club }} ({{ p.league_name }})</h2>
   <pre>{{ p.ucl }}</pre>
-  <pre>{{ p.other_europe }}</pre>
+  {% if p.other_europe %}<pre>{{ p.other_europe }}</pre>{% endif %}
   <pre>{{ p.cup }}</pre>
   <pre>{{ p.additional_cup }}</pre>
   <pre>{{ p.league }}</pre>
