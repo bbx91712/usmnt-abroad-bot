@@ -161,8 +161,12 @@ def _league_block(client: APIFootballClient, player, league_id: int, name: str, 
 
     if not last and not next_ and comp_context:
         note_line = f"    {comp_context}\n" if comp_context else ""
-    else:
-        note_line = f"    ({comp_format})\n" if comp_format else ""
+        return (
+            f"  {name}:\n"
+            f"    Current standing: {pos_line}\n"
+            f"{note_line}"
+        )
+    note_line = f"    ({comp_format})\n" if comp_format else ""
     return (
         f"  {name}:\n"
         f"    Current standing: {pos_line}\n"
