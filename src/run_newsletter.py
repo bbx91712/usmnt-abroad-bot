@@ -6,8 +6,10 @@ from .emailer import send
 
 
 def main() -> None:
+    print("Starting newsletter generation", flush=True)
     client = APIFootballClient()
     send(client)
+    print("Finished newsletter generation", flush=True)
 
 
 if __name__ == "__main__":

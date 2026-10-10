@@ -63,7 +63,7 @@ class APIFootballClient:
                     raise RuntimeError(f"API-Football error on {endpoint}: {payload['errors']}")
                 data = payload.get("response", [])
                 if not self.dry_run:
-                    print(f"[API] {endpoint} {params} -> {len(data)} results")
+                    print(f"[API] {endpoint} {params} -> {len(data)} results", flush=True)
                 self._cache[key] = data
                 return data
             except requests.RequestException:

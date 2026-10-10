@@ -11,11 +11,11 @@ def _dry_run(payload: dict[str, str]) -> None:
     outbox = config.outbox_dir()
     (outbox / "newsletter.txt").write_text(payload["text"], encoding="utf-8")
     (outbox / "newsletter.html").write_text(payload["html"], encoding="utf-8")
-    print("[DRY RUN] Newsletter written to:")
-    print(f"  - {outbox / 'newsletter.txt'}")
-    print(f"  - {outbox / 'newsletter.html'}")
-    print("\n--- TEXT PREVIEW ---\n")
-    print(payload["text"][:2000])
+    print("[DRY RUN] Newsletter written to:", flush=True)
+    print(f"  - {outbox / 'newsletter.txt'}", flush=True)
+    print(f"  - {outbox / 'newsletter.html'}", flush=True)
+    print("\n--- TEXT PREVIEW ---\n", flush=True)
+    print(payload["text"][:2000], flush=True)
 
 
 def send(client: APIFootballClient | None = None) -> None:
@@ -30,6 +30,7 @@ def send(client: APIFootballClient | None = None) -> None:
         _dry_run(payload)
         return
 
+    print(f"[EMAIL] Sending newsletter to {to}", flush=True)
     resend.api_key = config.resend_api_key()
     params = {
         "from": config.resend_from(),

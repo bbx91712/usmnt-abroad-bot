@@ -35,6 +35,7 @@ jobs:
       - name: Run newsletter
         run: python -m src.run_newsletter
         env:
+          PYTHONUNBUFFERED: 1
           RAPIDAPI_KEY: ${{ secrets.RAPIDAPI_KEY }}
           API_FOOTBALL_HOST: ${{ vars.API_FOOTBALL_HOST || 'v3.football.api-sports.io' }}
           API_FOOTBALL_BASE_URL: ${{ vars.API_FOOTBALL_BASE_URL || 'https://v3.football.api-sports.io' }}
