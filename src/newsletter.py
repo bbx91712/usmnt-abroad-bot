@@ -12,10 +12,14 @@ def _season() -> int:
 
 
 def _player_stats(client: APIFootballClient, player_id: int, league_id: int) -> str:
-    data = client.get("players", id=player_id, league=league_id, season=_season())
+    data = client.get("players", id=player_id, season=_season())
     if not data:
         return "n/a"
-    stats_obj = data[0].get("statistics", [{}])[0]
+    stats_list = data[0].get("statistics", [])
+    stats_obj = next(
+        (s for s in stats_list if s.get("league", {}).get("id") == league_id),
+        stats_list[0] if stats_list else {},
+    )
     games = stats_obj.get("games", {})
     goals = stats_obj.get("goals", {})
     apps = games.get("appearences", 0) or 0
