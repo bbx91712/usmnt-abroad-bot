@@ -108,7 +108,7 @@ def _competition_type(league_id: int) -> str:
     return "league"
 
 
-def _league_block(client: APIFootballClient, player, league_id: int, name: str) -> str:
+def _league_block(client: APIFootballClient, player, league_id: int, name: str, comp_format: str | None = None) -> str:
     last = fixtures.get_last(client, player.club_id, league_id)
     next_ = fixtures.get_next(client, player.club_id, league_id)
     watch = broadcasters.resolve(name)
@@ -140,23 +140,25 @@ def _league_block(client: APIFootballClient, player, league_id: int, name: str) 
         date = fixtures.format_date_et(next_["fixture"]["date"])
         next_line = f"{date} vs {opp}; watch: {watch['name']} ({watch['link']})"
 
+    format_line = f"    ({comp_format})\n" if comp_format else ""
     return (
         f"  {name}:\n"
         f"    Current standing: {pos_line}\n"
+        f"{format_line}"
         f"    Player stats: {stats}\n"
         f"    Last match: {last_line}\n"
         f"    Next match: {next_line}"
     )
 
 
-def _cup_for_country(country: str, cup_type: str = "primary") -> tuple[int, str] | None:
+def _cup_for_country(country: str, cup_type: str = "primary") -> tuple[int, str, str | None] | None:
     for key, comp in config.competitions()["competitions"].items():
         if (
             comp["type"] == "cup"
             and comp.get("cup_type", "primary") == cup_type
             and comp["country"] == country
         ):
-            return comp["league_id"], comp["name"]
+            return comp["league_id"], comp["name"], comp.get("format")
     return None
 
 
@@ -182,6 +184,7 @@ def _european_status(client: APIFootballClient, player) -> list[dict]:
             "key": key,
             "name": name,
             "league_id": league_id,
+            "format": comp.get("format"),
             "active": active,
             "last": last,
             "next": next_,
@@ -227,9 +230,11 @@ def _other_europe_text(client: APIFootballClient, player, european: list[dict]) 
             watch = broadcasters.resolve(e["key"])
             next_line = f"{date} vs {opp}; watch: {watch['name']} ({watch['link']})"
         stats = _player_stats(client, player, e["league_id"])
+        format_line = f"    ({e['format']})\n" if e.get("format") else ""
         blocks.append(
             f"  {e['name']}:\n"
             f"    Current standing: {pos_line}\n"
+            f"{format_line}"
             f"    Player stats: {stats}\n"
             f"    Last match: {last_line}\n"
             f"    Next match: {next_line}"
@@ -269,16 +274,16 @@ def _player_text(client: APIFootballClient, player) -> dict:
     # Domestic cup
     cup_info = _cup_for_country(player.uefa_assoc, "primary")
     if cup_info:
-        cup_id, cup_name = cup_info
-        cup_block = _league_block(client, player, cup_id, cup_name)
+        cup_id, cup_name, cup_format = cup_info
+        cup_block = _league_block(client, player, cup_id, cup_name, cup_format)
     else:
         cup_block = "  Domestic cup: not tracked for this association."
 
     # Additional domestic cup (e.g., EFL Cup, Supercoppa Italiana)
     add_cup_info = _cup_for_country(player.uefa_assoc, "additional")
     if add_cup_info:
-        add_cup_id, add_cup_name = add_cup_info
-        additional_cup_block = _league_block(client, player, add_cup_id, add_cup_name)
+        add_cup_id, add_cup_name, add_cup_format = add_cup_info
+        additional_cup_block = _league_block(client, player, add_cup_id, add_cup_name, add_cup_format)
     else:
         additional_cup_block = "  Additional domestic cup: none for this association."
 
