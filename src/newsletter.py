@@ -160,9 +160,16 @@ def _cup_for_country(country: str, cup_type: str = "primary") -> tuple[int, str]
     return None
 
 
-def _other_europe_text(client: APIFootballClient, player) -> str:
-    """Return a FA-Cup-style block for UCL/UEL/UECL, or a fallback block."""
-    blocks = []
+_UCL_SPOTS = {39: 4, 140: 4, 135: 4, 78: 4, 61: 4, 88: 2}
+
+
+def _ucl_spots_for_league(league_id: int) -> int | None:
+    return _UCL_SPOTS.get(league_id)
+
+
+def _european_status(client: APIFootballClient, player) -> list[dict]:
+    """Return UCL/UEL/UECL status entries for the player's club."""
+    entries = []
     for key, comp in config.competitions()["competitions"].items():
         if comp.get("type") != "european":
             continue
@@ -170,18 +177,43 @@ def _other_europe_text(client: APIFootballClient, player) -> str:
         name = comp["name"]
         last = fixtures.get_last(client, player.club_id, league_id)
         next_ = fixtures.get_next(client, player.club_id, league_id)
-        if not last and not next_:
+        active = bool(last or next_)
+        entry = {
+            "key": key,
+            "name": name,
+            "league_id": league_id,
+            "active": active,
+            "last": last,
+            "next": next_,
+            "summary": None,
+            "status": None,
+        }
+        if active:
+            entry["summary"] = standings.get_team_summary(client, player.club_id, league_id)
+            if not entry["summary"]:
+                entry["status"] = fixtures.cup_status_from_fixtures(last, next_, player.club_id)
+        entries.append(entry)
+    return entries
+
+
+def _other_europe_text(client: APIFootballClient, player, european: list[dict]) -> str:
+    """Return a FA-Cup-style block for UCL/UEL/UECL, always listing all three."""
+    blocks = []
+    for e in european:
+        if not e["active"]:
+            blocks.append(f"  {e['name']}:\n    Status: Not in this season's competition")
             continue
-        summary = standings.get_team_summary(client, player.club_id, league_id)
-        if summary:
+        if e["summary"]:
             pos_line = (
-                f"{summary['rank']} in {name}, "
-                f"{summary['points']} points through {summary['played']} matches"
+                f"{e['summary']['rank']} in {e['name']}, "
+                f"{e['summary']['points']} points through {e['summary']['played']} matches"
             )
+        elif e["status"]:
+            pos_line = e["status"]
         else:
-            pos_line = fixtures.cup_status(client, player.club_id, league_id)
-            if not pos_line:
-                pos_line = f"{name} table not yet available"
+            pos_line = f"{e['name']} table not yet available"
+        last = e["last"]
+        next_ = e["next"]
         last_line = "No result yet"
         if last:
             opp = fixtures.opponent_name(last, player.club_id)
@@ -192,40 +224,47 @@ def _other_europe_text(client: APIFootballClient, player) -> str:
         if next_:
             opp = fixtures.opponent_name(next_, player.club_id)
             date = fixtures.format_date_et(next_["fixture"]["date"])
-            watch = broadcasters.resolve(key)
+            watch = broadcasters.resolve(e["key"])
             next_line = f"{date} vs {opp}; watch: {watch['name']} ({watch['link']})"
-        stats = _player_stats(client, player, league_id)
+        stats = _player_stats(client, player, e["league_id"])
         blocks.append(
-            f"  {name}:\n"
+            f"  {e['name']}:\n"
             f"    Current standing: {pos_line}\n"
             f"    Player stats: {stats}\n"
             f"    Last match: {last_line}\n"
             f"    Next match: {next_line}"
         )
-    if not blocks:
-        return (
-            "  Other European competition:\n"
-            "    Current standing: No fixture scheduled\n"
-            "    Player stats: n/a\n"
-            "    Last match: No result yet\n"
-            "    Next match: No upcoming fixture"
-        )
     return "\n\n".join(blocks)
+
+
+def _ucl_status(client: APIFootballClient, player, european: list[dict]) -> str:
+    """Return the 2027-28 UCL qualification paths for the player's club."""
+    position = standings.get_team_position(client, player.club_id, player.league_id)
+    spots = _ucl_spots_for_league(player.league_id)
+    active = {e["key"] for e in european if e["active"]}
+    paths = []
+    if position is not None and spots is not None:
+        if position <= spots:
+            paths.append(f"currently in a UCL qualification spot ({position} in {player.league_name})")
+        else:
+            paths.append(f"a top-{spots} finish in {player.league_name}")
+    else:
+        paths.append(f"a strong domestic finish in {player.league_name}")
+    if "UCL" in active:
+        paths.append("winning the 2026-27 UEFA Champions League")
+    elif "UEL" in active:
+        paths.append("winning the 2026-27 UEFA Europa League")
+    return f"{player.club} can qualify for the 2027-28 Champions League by " + "; or ".join(paths) + "."
 
 
 def _player_text(client: APIFootballClient, player) -> dict:
     # League block
     league_block = _league_block(client, player, player.league_id, player.league_name)
 
-    # UCL status (best-guess from domestic position)
-    position = standings.get_team_position(client, player.club_id, player.league_id)
-    if position and position <= 4:
-        ucl = f"{player.club} is currently in a Champions League qualification spot ({position} place)."
-    else:
-        ucl = f"{player.club} is outside the UCL qualification places in {player.league_name}."
-
-    # Other Europe
-    other = _other_europe_text(client, player)
+    # European competition status and 2027-28 UCL qualification paths
+    european = _european_status(client, player)
+    ucl = _ucl_status(client, player, european)
+    other = _other_europe_text(client, player, european)
 
     # Domestic cup
     cup_info = _cup_for_country(player.uefa_assoc, "primary")
@@ -246,7 +285,7 @@ def _player_text(client: APIFootballClient, player) -> dict:
     header = f"{player.name}, {player.club}, {player.league_name} ({player.country})"
     text = (
         f"{header}\n"
-        f"  Champions League status: {ucl}\n"
+        f"  2027-28 Champions League status: {ucl}\n"
         f"{other}\n"
         f"{cup_block}\n"
         f"{additional_cup_block}\n"
@@ -290,7 +329,7 @@ def _render_html(player_data: list[dict]) -> str:
   <h1>USMNT Abroad Weekly Update</h1>
   {% for p in players %}
   <h2>{{ p.name }} - {{ p.club }} ({{ p.league_name }})</h2>
-  <p><strong>Champions League status:</strong> {{ p.ucl }}</p>
+  <p><strong>2027-28 Champions League status:</strong> {{ p.ucl }}</p>
   <pre>{{ p.other_europe }}</pre>
   <pre>{{ p.cup }}</pre>
   <pre>{{ p.additional_cup }}</pre>

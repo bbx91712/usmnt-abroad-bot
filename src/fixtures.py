@@ -86,13 +86,10 @@ def status_short(fixture: dict) -> str:
     return fixture.get("fixture", {}).get("status", {}).get("short", "?")
 
 
-def cup_status(
-    client: APIFootballClient, team_id: int, league_id: int, season: int | None = None
+def cup_status_from_fixtures(
+    last: dict | None, next_: dict | None, team_id: int
 ) -> str | None:
-    """Return a knockout-cup status (e.g., 'Advanced to Round 4') for a team."""
-    season = season or _season()
-    last = get_last(client, team_id, league_id, season)
-    next_ = get_next(client, team_id, league_id, season)
+    """Return a knockout/phase status from already-fetched fixtures."""
     if not last and not next_:
         return "No fixture scheduled"
     if last:
@@ -102,6 +99,8 @@ def cup_status(
         if winner is True:
             if next_:
                 next_round = next_.get("league", {}).get("round", "the next round")
+                if next_round == last_round:
+                    return f"Competing in {last_round}"
                 return f"Advanced to {next_round}"
             return f"Won {last_round}"
         if winner is False:
@@ -111,3 +110,13 @@ def cup_status(
         next_round = next_.get("league", {}).get("round", "the next round")
         return f"Upcoming {next_round}"
     return None
+
+
+def cup_status(
+    client: APIFootballClient, team_id: int, league_id: int, season: int | None = None
+) -> str | None:
+    """Return a knockout-cup status (e.g., 'Advanced to Round 4') for a team."""
+    season = season or _season()
+    last = get_last(client, team_id, league_id, season)
+    next_ = get_next(client, team_id, league_id, season)
+    return cup_status_from_fixtures(last, next_, team_id)
