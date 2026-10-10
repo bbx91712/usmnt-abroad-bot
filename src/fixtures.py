@@ -19,14 +19,24 @@ def _fetch(client: APIFootballClient, team_id: int, league_id: int, which: str, 
     return client.get("fixtures", team=team_id, league=league_id, season=season, **kwargs)
 
 
+def _belongs_to_league(fixture: dict, league_id: int) -> bool:
+    return fixture.get("league", {}).get("id") == league_id
+
+
 def get_last(client: APIFootballClient, team_id: int, league_id: int, season: int | None = None) -> dict | None:
     fixtures = _fetch(client, team_id, league_id, "last", season)
-    return fixtures[0] if fixtures else None
+    for fixture in fixtures:
+        if _belongs_to_league(fixture, league_id):
+            return fixture
+    return None
 
 
 def get_next(client: APIFootballClient, team_id: int, league_id: int, season: int | None = None) -> dict | None:
     fixtures = _fetch(client, team_id, league_id, "next", season)
-    return fixtures[0] if fixtures else None
+    for fixture in fixtures:
+        if _belongs_to_league(fixture, league_id):
+            return fixture
+    return None
 
 
 def get_live(client: APIFootballClient, **params) -> list[dict]:
