@@ -98,8 +98,10 @@ def _player_stats(client: APIFootballClient, player, league_id: int) -> str:
     stats_list = data[0].get("statistics", [])
     stats_obj = next(
         (s for s in stats_list if s.get("league", {}).get("id") == league_id),
-        stats_list[0] if stats_list else {},
+        {},
     )
+    if not stats_obj or not stats_obj.get("games"):
+        return "n/a"
     games = stats_obj.get("games", {})
     goals = stats_obj.get("goals", {})
     apps = games.get("appearences", 0) or 0
