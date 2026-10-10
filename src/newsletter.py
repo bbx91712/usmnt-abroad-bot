@@ -30,8 +30,9 @@ def _matches_name(api_player: dict, player) -> bool:
     last_ok = target_last == last or target_short == last or target_last in full or target_short in full
     first_ok = (
         not first
-        or first.startswith(target_first[0])
-        or target_first.startswith(first[0])
+        or first == target_first
+        or first.startswith(target_first)
+        or target_first.startswith(first)
         or target_first in full
     )
     return last_ok and first_ok
