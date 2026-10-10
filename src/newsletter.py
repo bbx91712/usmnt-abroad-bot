@@ -20,18 +20,28 @@ def _candidate_leagues() -> list[int]:
     )
 
 
-def _matches_name(entry_name: str, player) -> bool:
-    name = player.name.lower()
-    short = player.short_name.lower()
-    entry = (entry_name or "").lower()
-    return short in entry or name.split()[-1] in entry or name in entry
+def _matches_name(api_player: dict, player) -> bool:
+    target_first = (player.name.split()[0] or "").lower()
+    target_last = player.name.split()[-1].lower()
+    target_short = player.short_name.lower()
+    first = (api_player.get("firstname") or "").lower()
+    last = (api_player.get("lastname") or "").lower()
+    full = (api_player.get("name") or "").lower()
+    last_ok = target_last == last or target_short == last or target_last in full or target_short in full
+    first_ok = (
+        not first
+        or first.startswith(target_first[0])
+        or target_first.startswith(first[0])
+        or target_first in full
+    )
+    return last_ok and first_ok
 
 
 def _resolve_player(client: APIFootballClient, player) -> None:
     """Update player with current club/league from the API."""
     stats = None
     data = client.get("players", id=player.player_id, season=_season())
-    if data and _matches_name(data[0].get("player", {}).get("name", ""), player):
+    if data and _matches_name(data[0].get("player", {}), player):
         stats_list = data[0].get("statistics", [])
         stats = next(
             (s for s in stats_list if s.get("league", {}).get("id") == player.league_id),
@@ -46,7 +56,7 @@ def _resolve_player(client: APIFootballClient, player) -> None:
         for league_id in league_ids:
             search = client.get("players", search=player.short_name, league=league_id, season=_season())
             for entry in search or []:
-                if _matches_name(entry.get("player", {}).get("name", ""), player):
+                if _matches_name(entry.get("player", {}), player):
                     stats_list = entry.get("statistics", [])
                     if stats_list:
                         stats = stats_list[0]
