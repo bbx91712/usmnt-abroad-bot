@@ -26,11 +26,11 @@ def _round_prefix(fixture: dict | None) -> str:
     return f"({round_}) " if round_ else ""
 
 
-def _match_stats(client: APIFootballClient, player, fixture: dict | None, league_id: int) -> str:
+def _match_stats(client: APIFootballClient, player, fixture: dict | None) -> str:
     if not fixture:
         return ""
     data = fixtures.player_fixture_stats(
-        client, player.player_id, fixture["fixture"]["id"], league_id
+        client, player.player_id, fixture["fixture"]["id"], player.club_id
     )
     if not data:
         return "(Did not feature)"
@@ -178,7 +178,7 @@ def _league_block(
         result = fixtures.result_for_team(last, player.club_id)
         date = fixtures.format_date_et(last["fixture"]["date"])
         prefix = _round_prefix(last) if round_for_lines else ""
-        match_stats = _match_stats(client, player, last, league_id)
+        match_stats = _match_stats(client, player, last)
         stats_suffix = f" {match_stats}" if match_stats else ""
         last_line = f"{prefix}{date} vs {opp}: {result}{stats_suffix}"
     next_line = "No upcoming fixture"
@@ -286,7 +286,7 @@ def _other_europe_text(client: APIFootballClient, player, european: list[dict]) 
             opp = fixtures.opponent_name(last, player.club_id)
             result = fixtures.result_for_team(last, player.club_id)
             date = fixtures.format_date_et(last["fixture"]["date"])
-            match_stats = _match_stats(client, player, last, e["league_id"])
+            match_stats = _match_stats(client, player, last)
             stats_suffix = f" {match_stats}" if match_stats else ""
             last_line = f"{_round_prefix(last)}{date} vs {opp}: {result}{stats_suffix}"
         next_line = "No upcoming fixture"

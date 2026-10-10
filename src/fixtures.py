@@ -61,10 +61,18 @@ def get_lineups(client: APIFootballClient, fixture_id: int) -> list[dict]:
     return client.get("fixtures/lineups", fixture=fixture_id)
 
 
-def player_fixture_stats(client: APIFootballClient, player_id: int, fixture_id: int, league_id: int | None = None, season: int | None = None) -> dict:
-    data = client.get("fixtures/players", fixture=fixture_id)
+def player_fixture_stats(client: APIFootballClient, player_id: int, fixture_id: int, team_id: int | None = None) -> dict:
+    params: dict[str, int] = {"fixture": fixture_id}
+    if team_id is not None:
+        params["team"] = team_id
+    data = client.get("fixtures/players", **params)
     for entry in data:
-        if entry.get("player", {}).get("id") == player_id:
+        # Response may be grouped by team with a nested 'players' list, or a flat list of player entries.
+        if "players" in entry:
+            for player_entry in entry.get("players", []):
+                if player_entry.get("player", {}).get("id") == player_id:
+                    return player_entry
+        elif entry.get("player", {}).get("id") == player_id:
             return entry
     return {}
 
