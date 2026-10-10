@@ -257,10 +257,7 @@ def _ucl_status(client: APIFootballClient, player, european: list[dict]) -> str:
     active = {e["key"] for e in european if e["active"]}
     paths = []
     if position is not None and spots is not None:
-        if position <= spots:
-            paths.append(f"currently in a UCL qualification spot ({_ordinal(position)} in {player.league_name})")
-        else:
-            paths.append(f"a top-{spots} finish in {player.league_name}")
+        paths.append(f"a top-{spots} finish in {player.league_name}")
     else:
         paths.append(f"a strong domestic finish in {player.league_name}")
     if "UCL" in active:
@@ -269,12 +266,12 @@ def _ucl_status(client: APIFootballClient, player, european: list[dict]) -> str:
         paths.append("winning the 2026-27 UEFA Europa League")
     option_lines = []
     for i, p in enumerate(paths):
-        option_lines.append(f"      - {p}")
-        if i < len(paths) - 1:
+        if i > 0:
             option_lines.append("      - or -")
+        option_lines.append(f"      {p[0].upper()}{p[1:]}")
     return (
         "  2027-28 Champions League status:\n"
-        f"    can qualify for the 2027-28 Champions League by\n"
+        f"    {player.club} can qualify for the 2027-28 Champions League by:\n"
         + "\n".join(option_lines)
     )
 
