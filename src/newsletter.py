@@ -11,6 +11,14 @@ def _season() -> int:
     return config.competitions()["season"]
 
 
+def _ordinal(n: int) -> str:
+    if 10 <= (n % 100) <= 20:
+        suffix = "th"
+    else:
+        suffix = {1: "st", 2: "nd", 3: "rd"}.get(n % 10, "th")
+    return f"{n}{suffix}"
+
+
 def _matches_name(api_player: dict, player) -> bool:
     target_first = (player.name.split()[0] or "").lower()
     target_last = player.name.split()[-1].lower()
@@ -120,9 +128,9 @@ def _league_block(client: APIFootballClient, player, league_id: int, name: str, 
         total = _league_total_games(league_id)
         if summary:
             if total is not None:
-                pos_line = f"{summary['rank']} in {name}, {summary['points']} points through {summary['played']} of {total} matches"
+                pos_line = f"{_ordinal(summary['rank'])} in {name}, {summary['points']} points through {summary['played']} of {total} matches"
             else:
-                pos_line = f"{summary['rank']} in {name}"
+                pos_line = f"{_ordinal(summary['rank'])} in {name}"
         else:
             pos_line = f"{name} table not yet available"
     else:
@@ -208,7 +216,7 @@ def _other_europe_text(client: APIFootballClient, player, european: list[dict]) 
             continue
         if e["summary"]:
             pos_line = (
-                f"{e['summary']['rank']} in {e['name']}, "
+                f"{_ordinal(e['summary']['rank'])} in {e['name']}, "
                 f"{e['summary']['points']} points through {e['summary']['played']} matches"
             )
         elif e["status"]:
@@ -250,7 +258,7 @@ def _ucl_status(client: APIFootballClient, player, european: list[dict]) -> str:
     paths = []
     if position is not None and spots is not None:
         if position <= spots:
-            paths.append(f"currently in a UCL qualification spot ({position} in {player.league_name})")
+            paths.append(f"currently in a UCL qualification spot ({_ordinal(position)} in {player.league_name})")
         else:
             paths.append(f"a top-{spots} finish in {player.league_name}")
     else:
