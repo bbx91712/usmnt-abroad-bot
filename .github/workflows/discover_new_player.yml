@@ -1,0 +1,23 @@
+name: Discover new player by name
+
+on:
+  workflow_dispatch:
+    inputs:
+      short_name:
+        description: "Player short / last name to search (e.g., Pepi)"
+        required: true
+
+jobs:
+  discover:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -r requirements.txt
+      - run: python -m src.discover_new_player "${{ github.event.inputs.short_name }}"
+        env:
+          RAPIDAPI_KEY: ${{ secrets.RAPIDAPI_KEY }}
+          DRY_RUN: 0
+          MOCK_DATA: 0
