@@ -1,8 +1,7 @@
-"""Scrape ussoccerplayers.com and discover USMNT-eligible players in configured top leagues."""
+"""Scrape yanks-abroad.co/players/ and discover USMNT-eligible players in configured top leagues."""
 from __future__ import annotations
 
 import re
-from urllib.parse import urljoin
 
 import requests
 from bs4 import BeautifulSoup
@@ -11,32 +10,52 @@ from . import config
 from .api_football import APIFootballClient
 
 
-_URL = "https://ussoccerplayers.com/usmnt-players-abroad"
-
-
-def _top_leagues() -> dict[str, int]:
-    """Map normalized league name -> league_id for the configured domestic top leagues."""
-    out = {}
-    for c in config.competitions()["competitions"].values():
-        if c.get("type") == "league":
-            out[_norm(c["name"])] = c["league_id"]
-    return out
+_URL = "https://yanks-abroad.co/players/"
 
 
 def _norm(text: str) -> str:
     return re.sub(r"\s+", " ", text.strip().lower())
 
 
+def _top_league_ids() -> dict[str, int]:
+    return {
+        c["name"]: c["league_id"]
+        for c in config.competitions()["competitions"].values()
+        if c.get("type") == "league"
+    }
+
+
+def _league_to_id(league_text: str) -> int | None:
+    """Map a league name from the site to a configured top-league ID."""
+    top = _top_league_ids()
+    text = _norm(league_text)
+    if "english premier league" in text or text == "premier league":
+        return top.get("Premier League")
+    if "bundesliga" in text and "austrian" not in text and "regionalliga" not in text:
+        return top.get("Bundesliga")
+    if "la liga" in text or "laliga" in text:
+        return top.get("La Liga")
+    if "serie a" in text:
+        return top.get("Serie A")
+    if "ligue 1" in text or "ligue1" in text or "ligue" in text and "1" in text:
+        return top.get("Ligue 1")
+    if "eredivisie" in text:
+        return top.get("Eredivisie")
+    return None
+
+
+def _clean_name(name_text: str) -> str:
+    return re.sub(r"[^A-Za-z\s,\-'.]", "", name_text).strip()
+
+
 def _parse_name(name_text: str) -> tuple[str, str]:
     """Return (full_name, short_name) from a site name."""
-    name_text = re.sub(r"\[|\]", "", name_text).strip()
-    # Site mostly uses "Last, First"
+    name_text = _clean_name(name_text)
     if "," in name_text:
         last, first = name_text.split(",", 1)
         last = last.strip()
         first = first.strip()
         return f"{first} {last}", last
-    # Fall back to "First Last"; use the final token as the last name.
     parts = name_text.split()
     if len(parts) > 1:
         return name_text, parts[-1]
@@ -47,24 +66,25 @@ def _scrape_candidates() -> list[dict]:
     resp = requests.get(_URL, timeout=30)
     resp.raise_for_status()
     soup = BeautifulSoup(resp.text, "html.parser")
-    top_leagues = _top_leagues()
     candidates = []
     seen = set()
     for table in soup.find_all("table"):
         for row in table.find_all("tr"):
-            cells = row.find_all(["td"])
+            cells = row.find_all("td")
             if len(cells) < 3:
                 continue
             text = [" ".join(c.stripped_strings) for c in cells]
             if not text[0] or not text[1] or not text[2]:
                 continue
             full, short = _parse_name(text[0])
-            club = text[1]
-            league = text[2]
-            league_norm = _norm(league)
-            if league_norm not in top_leagues:
+            if not full:
                 continue
-            key = (short.lower(), club.lower(), top_leagues[league_norm])
+            club = text[1].strip()
+            league = text[2].strip()
+            league_id = _league_to_id(league)
+            if league_id is None:
+                continue
+            key = (short.lower(), club.lower(), league_id)
             if key in seen:
                 continue
             seen.add(key)
@@ -73,7 +93,7 @@ def _scrape_candidates() -> list[dict]:
                 "short_name": short,
                 "club": club,
                 "league_name": league,
-                "league_id": top_leagues[league_norm],
+                "league_id": league_id,
             })
     return candidates
 
@@ -92,9 +112,7 @@ def _api_matches(client: APIFootballClient, candidate: dict) -> list[dict]:
         api_name = (p.get("name") or "").lower()
         api_first = (p.get("firstname") or "").lower()
         api_last = (p.get("lastname") or "").lower()
-        full = candidate["full_name"].lower()
         short = candidate["short_name"].lower()
-        # Require at least last name match; first name optional because it may be abbreviated.
         if short not in api_name and short != api_last:
             continue
         if "," in candidate["full_name"].lower():
@@ -118,7 +136,7 @@ def _api_matches(client: APIFootballClient, candidate: dict) -> list[dict]:
 def main() -> None:
     client = APIFootballClient()
     candidates = _scrape_candidates()
-    print(f"Found {len(candidates)} USMNT-eligible players in tracked top leagues on ussoccerplayers.com\n")
+    print(f"Found {len(candidates)} USMNT-eligible players in tracked top leagues on yanks-abroad.co\n")
     for c in candidates:
         print(f"{c['full_name']} ({c['club']}, {c['league_name']})")
         matches = _api_matches(client, c)
