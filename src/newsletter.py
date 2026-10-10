@@ -267,7 +267,16 @@ def _ucl_status(client: APIFootballClient, player, european: list[dict]) -> str:
         paths.append("winning the 2026-27 UEFA Champions League")
     elif "UEL" in active:
         paths.append("winning the 2026-27 UEFA Europa League")
-    return f"{player.club} can qualify for the 2027-28 Champions League by " + "; or ".join(paths) + "."
+    option_lines = []
+    for i, p in enumerate(paths):
+        option_lines.append(f"      - {p}")
+        if i < len(paths) - 1:
+            option_lines.append("      - or -")
+    return (
+        "  2027-28 Champions League status:\n"
+        f"    can qualify for the 2027-28 Champions League by\n"
+        + "\n".join(option_lines)
+    )
 
 
 def _player_text(client: APIFootballClient, player) -> dict:
@@ -298,7 +307,7 @@ def _player_text(client: APIFootballClient, player) -> dict:
     header = f"{player.name}, {player.club}, {player.league_name} ({player.country})"
     text = (
         f"{header}\n"
-        f"  2027-28 Champions League status: {ucl}\n"
+        f"{ucl}\n"
         f"{other}\n"
         f"{cup_block}\n"
         f"{additional_cup_block}\n"
@@ -342,7 +351,7 @@ def _render_html(player_data: list[dict]) -> str:
   <h1>USMNT Abroad Weekly Update</h1>
   {% for p in players %}
   <h2>{{ p.name }} - {{ p.club }} ({{ p.league_name }})</h2>
-  <p><strong>2027-28 Champions League status:</strong> {{ p.ucl }}</p>
+  <pre>{{ p.ucl }}</pre>
   <pre>{{ p.other_europe }}</pre>
   <pre>{{ p.cup }}</pre>
   <pre>{{ p.additional_cup }}</pre>
