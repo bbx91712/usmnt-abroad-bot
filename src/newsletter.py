@@ -21,8 +21,8 @@ def _resolve_player(client: APIFootballClient, player) -> None:
             stats_list[0] if stats_list else None,
         )
     else:
-        # Stored id may be stale or the player moved; search by short name
-        search = client.get("players", search=player.short_name, season=_season())
+        # Stored id may be stale or the player moved; search by short name in the stored league
+        search = client.get("players", search=player.short_name, league=player.league_id, season=_season())
         stats = None
         for entry in search or []:
             if player.short_name.lower() in entry.get("player", {}).get("name", "").lower():
