@@ -16,12 +16,15 @@ def _player_stats(client: APIFootballClient, player, league_id: int) -> str:
     if not data:
         # Stored player id may be stale; look up by name in the current squad
         squad = client.get("players/squads", team=player.club_id)
-        for member in squad:
-            member_name = member.get("player", {}).get("name", "").lower()
-            if player.short_name.lower() in member_name or player.name.lower() in member_name:
-                data = client.get("players", id=member["player"]["id"], season=_season())
-                if data:
-                    break
+        if squad:
+            for member in squad[0].get("players", []):
+                member_name = member.get("name", "").lower()
+                last_name = (member.get("lastname") or "").lower()
+                target = player.short_name.lower()
+                if target in member_name or target in last_name:
+                    data = client.get("players", id=member["id"], season=_season())
+                    if data:
+                        break
     if not data:
         return "n/a"
     stats_list = data[0].get("statistics", [])
