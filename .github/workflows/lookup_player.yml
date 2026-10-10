@@ -1,0 +1,27 @@
+name: Look up player ID
+
+on:
+  workflow_dispatch:
+    inputs:
+      short_name:
+        description: "Player short name (e.g., Weah)"
+        required: true
+      league_id:
+        description: "League ID (e.g., 61 for Ligue 1)"
+        required: true
+
+jobs:
+  lookup:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -r requirements.txt
+      - run: python -m src.lookup_player "${{ github.event.inputs.short_name }}" "${{ github.event.inputs.league_id }}"
+        env:
+          RAPIDAPI_KEY: ${{ secrets.RAPIDAPI_KEY }}
+          DRY_RUN: 0
+          MOCK_DATA: 0
+          PYTHONUNBUFFERED: 1
