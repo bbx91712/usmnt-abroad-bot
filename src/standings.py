@@ -27,3 +27,18 @@ def get_team_position(
         if row.get("team", {}).get("id") == team_id:
             return row.get("rank")
     return None
+
+
+def get_team_summary(
+    client: APIFootballClient, team_id: int, league_id: int, season: int | None = None
+) -> dict[str, int] | None:
+    """Return rank, points and games played for a team from the standings table."""
+    table = get_table(client, league_id, season)
+    for row in table:
+        if row.get("team", {}).get("id") == team_id:
+            return {
+                "rank": row.get("rank"),
+                "points": row.get("points", 0),
+                "played": row.get("all", {}).get("played", 0),
+            }
+    return None

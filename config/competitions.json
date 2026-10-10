@@ -23,37 +23,43 @@
       "name": "Premier League",
       "league_id": 39,
       "type": "league",
-      "country": "England"
+      "country": "England",
+      "games": 38
     },
     "La Liga": {
       "name": "La Liga",
       "league_id": 140,
       "type": "league",
-      "country": "Spain"
+      "country": "Spain",
+      "games": 38
     },
     "Serie A": {
       "name": "Serie A",
       "league_id": 135,
       "type": "league",
-      "country": "Italy"
+      "country": "Italy",
+      "games": 38
     },
     "Bundesliga": {
       "name": "Bundesliga",
       "league_id": 78,
       "type": "league",
-      "country": "Germany"
+      "country": "Germany",
+      "games": 34
     },
     "Ligue 1": {
       "name": "Ligue 1",
       "league_id": 61,
       "type": "league",
-      "country": "France"
+      "country": "France",
+      "games": 34
     },
     "Eredivisie": {
       "name": "Eredivisie",
       "league_id": 88,
       "type": "league",
-      "country": "Netherlands"
+      "country": "Netherlands",
+      "games": 34
     },
     "FA Cup": {
       "name": "FA Cup",
