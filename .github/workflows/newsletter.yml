@@ -5,6 +5,17 @@ on:
     # Monday 12:00 UTC ≈ 8:00 AM ET / 7:00 AM EST
     - cron: '0 12 * * 1'
   workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (1 = do not send email)'
+        required: true
+        default: '0'
+        type: string
+      mock_data:
+        description: 'Use mock data (1 = no real API calls)'
+        required: true
+        default: '0'
+        type: string
 
 jobs:
   newsletter:
@@ -30,5 +41,5 @@ jobs:
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           RESEND_FROM: ${{ secrets.RESEND_FROM }}
           RESEND_TO: ${{ secrets.RESEND_TO }}
-          DRY_RUN: ${{ vars.DRY_RUN || '0' }}
-          MOCK_DATA: ${{ vars.MOCK_DATA || '0' }}
+          DRY_RUN: ${{ github.event.inputs.dry_run || vars.DRY_RUN || '0' }}
+          MOCK_DATA: ${{ github.event.inputs.mock_data || vars.MOCK_DATA || '0' }}
