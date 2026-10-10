@@ -26,7 +26,7 @@ def send(client: APIFootballClient | None = None) -> None:
     if not to:
         to = ["dev@example.com"]
 
-    if config.dry_run() or not config.resend_api_key():
+    if config.dry_run() or config.mock_data() or not config.resend_api_key():
         _dry_run(payload)
         return
 
